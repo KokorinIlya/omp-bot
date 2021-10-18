@@ -2,7 +2,7 @@ package item
 
 import "fmt"
 
-type Item struct {
+type Item struct { // TODO: add field
 	Title string
 }
 

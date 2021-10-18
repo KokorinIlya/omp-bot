@@ -15,6 +15,7 @@ type ItemService interface {
 	Create(item item.Item) (uint64, error)
 	Update(itemId uint64, item item.Item) error
 	Remove(itemId uint64) error
+	ItemsCount() uint64
 }
 
 //goland:noinspection GoNameStartsWithPackageName
@@ -33,6 +34,8 @@ func NewItemCommander(botApi *tgbotapi.BotAPI) *ItemCommander {
 
 func (commander *ItemCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 	switch callbackPath.CallbackName {
+	case "list":
+		commander.CallbackList(callback, callbackPath)
 	default:
 		log.Printf("ItemCommander.HandleCallback: unknown callback name: %s", callbackPath.CallbackName)
 	}
@@ -46,6 +49,12 @@ func (commander *ItemCommander) HandleCommand(msg *tgbotapi.Message, commandPath
 		commander.Get(msg)
 	case "new":
 		commander.New(msg)
+	case "edit":
+		commander.Edit(msg)
+	case "delete":
+		commander.Delete(msg)
+	case "list":
+		commander.List(msg)
 	default:
 		commander.Default(msg)
 	}

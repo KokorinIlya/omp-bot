@@ -6,12 +6,12 @@ import (
 	"strconv"
 )
 
-func (commander *ItemCommander) Get(inputMessage *tgbotapi.Message) {
+func (commander *ItemCommander) Delete(inputMessage *tgbotapi.Message) {
 	chatId := inputMessage.Chat.ID
 	commandArgs := inputMessage.CommandArguments()
 	itemIndex, err := strconv.Atoi(commandArgs)
 	if err != nil {
-		msgText := fmt.Sprintf("Couldn't parse index to get item by: %v", err)
+		msgText := fmt.Sprintf("Couldn't parse index to delete item by: %v", err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
@@ -22,13 +22,13 @@ func (commander *ItemCommander) Get(inputMessage *tgbotapi.Message) {
 		commander.sendMessage(msg)
 		return
 	}
-	item, err := commander.itemService.Describe(uint64(itemIndex))
+	err = commander.itemService.Remove(uint64(itemIndex))
 	if err != nil {
-		msgText := fmt.Sprintf("Cannot get item by index %v: %v", itemIndex, err)
+		msgText := fmt.Sprintf("Cannot delete item by index %v: %v", itemIndex, err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
-	msg := tgbotapi.NewMessage(chatId, item.String())
+	msg := tgbotapi.NewMessage(chatId, "Successfully removed item")
 	commander.sendMessage(msg)
 }

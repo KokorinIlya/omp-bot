@@ -7,19 +7,22 @@ import (
 )
 
 func (commander *ItemCommander) New(inputMessage *tgbotapi.Message) {
-	uid := inputMessage.Chat.ID
+	chatId := inputMessage.Chat.ID
 	title := inputMessage.CommandArguments()
 	if title == "" {
-		commander.SendMessage(uid, "Expected new item title")
+		msg := tgbotapi.NewMessage(chatId, "Expected new item title")
+		commander.sendMessage(msg)
 		return
 	}
 	newItem := item.NewItem(title)
 	newIdx, err := commander.itemService.Create(*newItem)
 	if err != nil {
 		msgText := fmt.Sprintf("Coudn't create new item: %v", err)
-		commander.SendMessage(uid, msgText)
+		msg := tgbotapi.NewMessage(chatId, msgText)
+		commander.sendMessage(msg)
 		return
 	}
 	msgText := fmt.Sprintf("Successfully inserted new item, index is %v", newIdx)
-	commander.SendMessage(uid, msgText)
+	msg := tgbotapi.NewMessage(chatId, msgText)
+	commander.sendMessage(msg)
 }
