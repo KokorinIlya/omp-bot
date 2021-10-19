@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (commander *ItemCommander) Edit(inputMessage *tgbotapi.Message) {
+func (commander *ItemCommander) Edit(inputMessage *tgbotapi.Message) { // TODO: get remaining fields
 	chatId := inputMessage.Chat.ID
 	commandArgs := strings.Split(inputMessage.CommandArguments(), " ")
 	if len(commandArgs) != 2 {

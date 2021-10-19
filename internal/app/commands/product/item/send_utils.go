@@ -8,13 +8,13 @@ import (
 func (commander *ItemCommander) editMessage(msg tgbotapi.EditMessageTextConfig) {
 	_, err := commander.botApi.Send(msg)
 	if err != nil {
-		log.Printf("Error sending reply message to chat with id %v: %v", msg.ChatID, err)
+		log.Printf("Error editing text of message from chat %v: %v", msg.ChatID, err)
 	}
 }
 
 func (commander *ItemCommander) sendMessage(msg tgbotapi.MessageConfig) {
 	_, err := commander.botApi.Send(msg)
 	if err != nil {
-		log.Printf("Error sending reply message to chat with id %v: %v", msg.ChatID, err)
+		log.Printf("Error sending reply message to chat %v: %v", msg.ChatID, err)
 	}
 }

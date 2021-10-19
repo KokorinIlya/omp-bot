@@ -14,15 +14,16 @@ func (commander *ItemCommander) New(inputMessage *tgbotapi.Message) {
 		commander.sendMessage(msg)
 		return
 	}
+	// Ids are allocated by ItemService
 	newItem := item.NewItem(0, title)
 	newId, err := commander.itemService.Create(*newItem)
 	if err != nil {
-		msgText := fmt.Sprintf("Coudn't create new item: %v", err)
+		msgText := fmt.Sprintf("Couldn't create new item: %v", err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
-	msgText := fmt.Sprintf("Successfully inserted new item, id is %v", newId)
+	msgText := fmt.Sprintf("Successfully inserted new item, new item id is %v", newId)
 	msg := tgbotapi.NewMessage(chatId, msgText)
 	commander.sendMessage(msg)
 }
