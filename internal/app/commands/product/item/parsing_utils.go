@@ -16,3 +16,18 @@ func (commander *ItemCommander) parseIdOrSendError(strId string, chatId int64, i
 	}
 	return id, nil
 }
+
+func (commander *ItemCommander) validateArgumentsCountOrSendError(arguments []string, expectedLen int,
+	chatId int64, argsDescription string,
+) bool {
+	if len(arguments) != expectedLen {
+		msgText := fmt.Sprintf(
+			"Expected %v arguments: %v, but received %v: %v",
+			expectedLen, argsDescription, len(arguments), arguments,
+		)
+		msg := tgbotapi.NewMessage(chatId, msgText)
+		commander.sendMessage(msg)
+		return false
+	}
+	return true
+}

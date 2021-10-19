@@ -10,13 +10,8 @@ import (
 func (commander *ItemCommander) Edit(inputMessage *tgbotapi.Message) {
 	chatId := inputMessage.Chat.ID
 	commandArgs := strings.Split(inputMessage.CommandArguments(), " ")
-	if len(commandArgs) != 4 {
-		msgText := fmt.Sprintf(
-			"Expected 4 arguments: <id> <owner_id> <product_id> <title>, but received %v: %v",
-			len(commandArgs), commandArgs,
-		)
-		msg := tgbotapi.NewMessage(chatId, msgText)
-		commander.sendMessage(msg)
+	if !commander.validateArgumentsCountOrSendError(commandArgs, 4, chatId,
+		"<id> <owner_id> <product_id> <title>") {
 		return
 	}
 	itemId, err := commander.parseIdOrSendError(commandArgs[0], chatId, "to edit item by")
@@ -32,7 +27,7 @@ func (commander *ItemCommander) Edit(inputMessage *tgbotapi.Message) {
 		return
 	}
 
-	newTitle := commandArgs[1]
+	newTitle := commandArgs[3]
 	newItem := item.NewItem(itemId, ownerId, productId, newTitle)
 
 	err = commander.itemService.Update(itemId, *newItem)

@@ -10,13 +10,8 @@ import (
 func (commander *ItemCommander) New(inputMessage *tgbotapi.Message) {
 	chatId := inputMessage.Chat.ID
 	commandArgs := strings.Split(inputMessage.CommandArguments(), " ")
-	if len(commandArgs) != 3 {
-		msgText := fmt.Sprintf(
-			"Expected 3 arguments: <owner_id> <product_id> <title>, but received %v: %v",
-			len(commandArgs), commandArgs,
-		)
-		msg := tgbotapi.NewMessage(chatId, msgText)
-		commander.sendMessage(msg)
+	if !commander.validateArgumentsCountOrSendError(commandArgs, 3, chatId,
+		"<owner_id> <product_id> <title>") {
 		return
 	}
 	ownerId, err := commander.parseIdOrSendError(commandArgs[0], chatId, "of owner")
