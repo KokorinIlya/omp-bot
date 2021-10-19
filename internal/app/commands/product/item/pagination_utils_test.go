@@ -157,7 +157,7 @@ func TestPaginateRightmostPage(t *testing.T) {
 	}
 	if len(keyboard.InlineKeyboard) != 1 || len(keyboard.InlineKeyboard[0]) != 1 ||
 		keyboard.InlineKeyboard[0][0].Text != "К предыдущей странице" {
-		t.Errorf("Expected only next page button, but received %v", keyboard.InlineKeyboard)
+		t.Errorf("Expected only prev page button, but received %v", keyboard.InlineKeyboard)
 	}
 }
 
@@ -187,6 +187,6 @@ func TestPaginateMiddlePage(t *testing.T) {
 	if len(keyboard.InlineKeyboard) != 1 || len(keyboard.InlineKeyboard[0]) != 2 ||
 		keyboard.InlineKeyboard[0][0].Text != "К предыдущей странице" ||
 		keyboard.InlineKeyboard[0][1].Text != "К следующей странице" {
-		t.Errorf("Expected only next page button, but received %v", keyboard.InlineKeyboard)
+		t.Errorf("Expected both pagination buttons, but received %v", keyboard.InlineKeyboard)
 	}
 }
