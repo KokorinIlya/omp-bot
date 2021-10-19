@@ -13,31 +13,25 @@ func (commander *ItemCommander) Edit(inputMessage *tgbotapi.Message) {
 	commandArgs := strings.Split(inputMessage.CommandArguments(), " ")
 	if len(commandArgs) != 2 {
 		msgText := fmt.Sprintf(
-			"Expected 2 arguments: <index> <title>, but received %v: %v",
+			"Expected 2 arguments: <id> <title>, but received %v: %v",
 			len(commandArgs), commandArgs,
 		)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
-	itemIndex, err := strconv.Atoi(commandArgs[0])
+	itemId, err := strconv.ParseUint(commandArgs[0], 10, 64)
 	if err != nil {
-		msgText := fmt.Sprintf("Couldn't parse index to edit item by: %v", err)
-		msg := tgbotapi.NewMessage(chatId, msgText)
-		commander.sendMessage(msg)
-		return
-	}
-	if itemIndex < 0 {
-		msgText := fmt.Sprintf("Expected item index not less than zero, but %v received", itemIndex)
+		msgText := fmt.Sprintf("Couldn't parse id to edit item by: %v", err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
 	newTitle := commandArgs[1]
-	newItem := item.NewItem(newTitle)
-	err = commander.itemService.Update(uint64(itemIndex), *newItem)
+	newItem := item.NewItem(itemId, newTitle)
+	err = commander.itemService.Update(itemId, *newItem)
 	if err != nil {
-		msgText := fmt.Sprintf("Cannot edit item by index %v: %v", itemIndex, err)
+		msgText := fmt.Sprintf("Cannot edit item by id %v: %v", itemId, err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return

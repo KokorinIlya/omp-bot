@@ -9,22 +9,16 @@ import (
 func (commander *ItemCommander) Get(inputMessage *tgbotapi.Message) {
 	chatId := inputMessage.Chat.ID
 	commandArgs := inputMessage.CommandArguments()
-	itemIndex, err := strconv.Atoi(commandArgs)
+	itemId, err := strconv.ParseUint(commandArgs, 10, 64)
 	if err != nil {
-		msgText := fmt.Sprintf("Couldn't parse index to get item by: %v", err)
+		msgText := fmt.Sprintf("Couldn't parse id to get item by: %v", err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
-	if itemIndex < 0 {
-		msgText := fmt.Sprintf("Expected item index not less than zero, but %v received", itemIndex)
-		msg := tgbotapi.NewMessage(chatId, msgText)
-		commander.sendMessage(msg)
-		return
-	}
-	item, err := commander.itemService.Describe(uint64(itemIndex))
+	item, err := commander.itemService.Describe(itemId)
 	if err != nil {
-		msgText := fmt.Sprintf("Cannot get item by index %v: %v", itemIndex, err)
+		msgText := fmt.Sprintf("Cannot get item by id %v: %v", itemId, err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return

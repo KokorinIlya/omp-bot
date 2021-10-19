@@ -3,23 +3,29 @@ package item
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 )
 
-type DummyItemService struct { // TODO: id does not change, hashmap + list
-	items []Item
+type DummyItemService struct {
+	indexById map[uint64]int
+	items     []Item
 }
 
 func NewDummyItemService() *DummyItemService {
 	return &DummyItemService{
-		items: make([]Item, 0),
+		items:     make([]Item, 0),
+		indexById: make(map[uint64]int),
 	}
 }
 
 func (itemService *DummyItemService) Describe(itemId uint64) (*Item, error) {
-	if err := itemService.checkIndex(itemId); err != nil {
-		return nil, err
+	idx, contains := itemService.indexById[itemId]
+	if !contains {
+		return nil, errors.New(fmt.Sprintf(
+			"No item with id %v", itemId,
+		))
 	}
-	return &itemService.items[itemId], nil
+	return &itemService.items[idx], nil
 }
 
 func (itemService *DummyItemService) List(cursor uint64, limit uint64) ([]Item, error) {
@@ -37,43 +43,59 @@ func (itemService *DummyItemService) List(cursor uint64, limit uint64) ([]Item, 
 	return itemService.items[cursor:right], nil
 }
 
+const maxRetries = 10
+
 func (itemService *DummyItemService) Create(item Item) (uint64, error) {
+	var newId uint64
+	retries := 0
+	for {
+		newId = uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
+		_, contains := itemService.indexById[newId]
+		if !contains {
+			break
+		}
+		if retries == maxRetries {
+			return 0, errors.New("cannot allocate id, please try again later")
+		}
+		retries++
+	}
+	item.Id = newId
 	itemService.items = append(itemService.items, item)
-	return uint64(len(itemService.items) - 1), nil
+	itemService.indexById[newId] = len(itemService.items) - 1
+	return newId, nil
 }
 
 func (itemService *DummyItemService) Update(itemId uint64, item Item) error {
-	if err := itemService.checkIndex(itemId); err != nil {
-		return err
+	if itemId != item.Id {
+		return errors.New("itemId != item.Id")
 	}
-	itemService.items[itemId] = item
+	idx, contains := itemService.indexById[itemId]
+	if !contains {
+		return errors.New(fmt.Sprintf(
+			"No item with id %v", itemId,
+		))
+	}
+	itemService.items[idx] = item
 	return nil
 }
 
 func (itemService *DummyItemService) Remove(itemId uint64) error {
-	if err := itemService.checkIndex(itemId); err != nil {
-		return err
+	idx, contains := itemService.indexById[itemId]
+	if !contains {
+		return errors.New(fmt.Sprintf(
+			"No item with id %v", itemId,
+		))
 	}
-	itemService.items = append(itemService.items[:itemId], itemService.items[itemId+1:]...)
+	for i := idx + 1; i < len(itemService.items); i++ {
+		item := itemService.items[i]
+		itemService.items[i-1] = item
+		itemService.indexById[item.Id] = i - 1
+	}
+	delete(itemService.indexById, itemId)
+	itemService.items = itemService.items[:len(itemService.items)-1]
 	return nil
 }
 
 func (itemService *DummyItemService) ItemsCount() uint64 {
 	return uint64(len(itemService.items))
-}
-
-func (itemService *DummyItemService) checkIndex(itemId uint64) error {
-	if itemId >= uint64(len(itemService.items)) {
-		if len(itemService.items) > 0 {
-			return errors.New(fmt.Sprintf(
-				"Incorrect index %v, correct indexes are [0..%v]", itemId, len(itemService.items)-1,
-			))
-		} else {
-			return errors.New(fmt.Sprintf(
-				"Incorrect index %v for empty item storage", itemId,
-			))
-		}
-	} else {
-		return nil
-	}
 }

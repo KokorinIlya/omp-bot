@@ -14,15 +14,15 @@ func (commander *ItemCommander) New(inputMessage *tgbotapi.Message) {
 		commander.sendMessage(msg)
 		return
 	}
-	newItem := item.NewItem(title)
-	newIdx, err := commander.itemService.Create(*newItem)
+	newItem := item.NewItem(0, title)
+	newId, err := commander.itemService.Create(*newItem)
 	if err != nil {
 		msgText := fmt.Sprintf("Coudn't create new item: %v", err)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
-	msgText := fmt.Sprintf("Successfully inserted new item, index is %v", newIdx)
+	msgText := fmt.Sprintf("Successfully inserted new item, id is %v", newId)
 	msg := tgbotapi.NewMessage(chatId, msgText)
 	commander.sendMessage(msg)
 }
