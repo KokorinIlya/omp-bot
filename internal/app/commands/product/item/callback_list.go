@@ -16,10 +16,17 @@ func (commander *ItemCommander) CallbackList(callback *tgbotapi.CallbackQuery, c
 		return
 	}
 
-	msg, err := getPaginatedMessage(commander.itemService, chatId, cursorData.Cursor, DefaultItemsPerPage)
+	msgText, keyboard, err := getPaginatedMessage(commander.itemService,
+		cursorData.Cursor, DefaultItemsPerPage)
 	if err != nil {
 		log.Printf("Error when getting paginated data: %v", err)
 		return
 	}
-	commander.sendMessage(*msg) // TODO: EditMessageText
+	msg := tgbotapi.NewEditMessageText(
+		chatId,
+		callback.Message.MessageID,
+		msgText,
+	)
+	msg.ReplyMarkup = keyboard
+	commander.editMessage(msg)
 }
