@@ -20,7 +20,7 @@ type ProductCommander struct {
 
 func (commander *ProductCommander) HandleCallback(callback *tgbotapi.CallbackQuery, callbackPath path.CallbackPath) {
 	switch callbackPath.Subdomain {
-	case "subdomain":
+	case "item":
 		commander.itemCommander.HandleCallback(callback, callbackPath)
 	default:
 		log.Printf("ProductCommander.HandleCallback: unknown subdomain - %s", callbackPath.Subdomain)

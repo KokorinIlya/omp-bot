@@ -11,6 +11,11 @@ type DummyItemService struct {
 	items     []Item
 }
 
+const (
+	maxRetries    = 10
+	noSuchItemIdx = -1
+)
+
 func NewDummyItemService() *DummyItemService {
 	return &DummyItemService{
 		items:     make([]Item, 0),
@@ -20,7 +25,7 @@ func NewDummyItemService() *DummyItemService {
 
 func (itemService *DummyItemService) Describe(itemId uint64) (*Item, error) {
 	idx, contains := itemService.indexById[itemId]
-	if !contains {
+	if !contains || idx < 0 {
 		return nil, errors.New(fmt.Sprintf(
 			"No item with id %v", itemId,
 		))
@@ -42,8 +47,6 @@ func (itemService *DummyItemService) List(cursor uint64, limit uint64) ([]Item, 
 	}
 	return itemService.items[cursor:right], nil
 }
-
-const maxRetries = 10
 
 func (itemService *DummyItemService) Create(item Item) (uint64, error) {
 	var newId uint64
@@ -70,7 +73,7 @@ func (itemService *DummyItemService) Update(itemId uint64, item Item) error {
 		return errors.New("itemId != item.Id")
 	}
 	idx, contains := itemService.indexById[itemId]
-	if !contains {
+	if !contains || idx < 0 {
 		return errors.New(fmt.Sprintf(
 			"No item with id %v", itemId,
 		))
@@ -81,7 +84,7 @@ func (itemService *DummyItemService) Update(itemId uint64, item Item) error {
 
 func (itemService *DummyItemService) Remove(itemId uint64) error {
 	idx, contains := itemService.indexById[itemId]
-	if !contains {
+	if !contains || idx < 0 {
 		return errors.New(fmt.Sprintf(
 			"No item with id %v", itemId,
 		))
@@ -91,7 +94,8 @@ func (itemService *DummyItemService) Remove(itemId uint64) error {
 		itemService.items[i-1] = item
 		itemService.indexById[item.Id] = i - 1
 	}
-	delete(itemService.indexById, itemId)
+	// Ids of removed items will not be allocated for new items
+	itemService.indexById[itemId] = noSuchItemIdx
 	itemService.items = itemService.items[:len(itemService.items)-1]
 	return nil
 }
