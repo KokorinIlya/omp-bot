@@ -5,6 +5,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/ozonmp/omp-bot/internal/app/path"
 	"github.com/ozonmp/omp-bot/internal/service/product/item"
+	"strings"
 )
 
 const DefaultItemsPerPage = 3
@@ -68,9 +69,9 @@ func formatItems(items []item.Item) string {
 	if len(items) == 0 {
 		return "Ни одного элемента"
 	}
-	res := "" // TODO: string builder
+	var res strings.Builder
 	for _, curItem := range items {
-		res += curItem.String() + ";\n"
+		res.WriteString(curItem.String() + ";\n")
 	}
-	return res
+	return res.String()
 }
