@@ -14,7 +14,12 @@ type CursorData struct {
 	Cursor uint64 `json:"offset"`
 }
 
-func getPaginatedMessage(itemService ItemService,
+type ItemListService interface {
+	List(cursor uint64, limit uint64) ([]item.Item, error)
+	ItemsCount() uint64
+}
+
+func getPaginatedMessage(itemService ItemListService,
 	cursor uint64, limit uint64) (string, *tgbotapi.InlineKeyboardMarkup, error) {
 	items, err := itemService.List(cursor, limit)
 	if err != nil {

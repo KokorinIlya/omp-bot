@@ -24,7 +24,7 @@ func TestGetNonExistingItem(t *testing.T) {
 
 func TestCreateItem(t *testing.T) {
 	service := NewDummyItemService()
-	item := NewItem(0, "title")
+	item := NewItem(0, 10, 10, "title")
 	_, err := service.Create(*item)
 	if err != nil {
 		t.Errorf("Expected successful creation, but %v received", err)
@@ -33,7 +33,7 @@ func TestCreateItem(t *testing.T) {
 
 func TestRequestCreatedItem(t *testing.T) {
 	service := NewDummyItemService()
-	item := NewItem(0, "title")
+	item := NewItem(0, 10, 10, "title")
 	uid, err := service.Create(*item)
 	if err != nil {
 		t.Errorf("Expected successful creation, but %v received", err)
@@ -54,7 +54,7 @@ func TestCountCreates(t *testing.T) {
 	}
 	var i uint64
 	for i = 1; i < 20; i++ {
-		_, _ = service.Create(*NewItem(0, fmt.Sprintf("title_%v", i)))
+		_, _ = service.Create(*NewItem(0, 10, 10, fmt.Sprintf("title_%v", i)))
 		if cnt := service.ItemsCount(); cnt != i {
 			t.Errorf("Expected %v items at empty service, but received %v", i, cnt)
 		}
@@ -63,9 +63,9 @@ func TestCountCreates(t *testing.T) {
 
 func TestUpdateTheOnlyItem(t *testing.T) {
 	service := NewDummyItemService()
-	item := NewItem(0, "title")
+	item := NewItem(0, 10, 10, "title")
 	uid, _ := service.Create(*item)
-	newItem := NewItem(uid, "new title")
+	newItem := NewItem(uid, 10, 10,"new title")
 	err := service.Update(uid, *newItem)
 	if err != nil {
 		t.Errorf("Expected successful update, but %v received", err)
@@ -81,11 +81,11 @@ func TestUpdateTheOnlyItem(t *testing.T) {
 
 func TestUpdateOneOfManyItems(t *testing.T) {
 	service := NewDummyItemService()
-	uid1, _ := service.Create(*NewItem(0, "title_1"))
-	uid2, _ := service.Create(*NewItem(0, "title_2"))
-	uid3, _ := service.Create(*NewItem(0, "title_3"))
-	uid4, _ := service.Create(*NewItem(0, "title_4"))
-	newItem := NewItem(uid3, "new title_3")
+	uid1, _ := service.Create(*NewItem(0, 10, 10, "title_1"))
+	uid2, _ := service.Create(*NewItem(0, 10, 10, "title_2"))
+	uid3, _ := service.Create(*NewItem(0, 10, 10, "title_3"))
+	uid4, _ := service.Create(*NewItem(0, 10, 10, "title_4"))
+	newItem := NewItem(uid3, 10, 10,"new title_3")
 	err := service.Update(uid3, *newItem)
 	if err != nil {
 		t.Errorf("Expected successful update, but %v received", err)
@@ -113,9 +113,9 @@ func TestUpdateOneOfManyItems(t *testing.T) {
 
 func TestUpdateChangeId(t *testing.T) {
 	service := NewDummyItemService()
-	item := NewItem(0, "title")
+	item := NewItem(0, 10, 10,"title")
 	uid, _ := service.Create(*item)
-	newItem := NewItem(uid+1, "new title")
+	newItem := NewItem(uid+1, 10, 10, "new title")
 	err := service.Update(uid, *newItem)
 	if err == nil {
 		t.Error("Expected update fail, but update succeed")
@@ -124,7 +124,7 @@ func TestUpdateChangeId(t *testing.T) {
 
 func TestUpdateNonExistingItem(t *testing.T) {
 	service := NewDummyItemService()
-	newItem := NewItem(42, "new title")
+	newItem := NewItem(42, 10, 10,"new title")
 	err := service.Update(42, *newItem)
 	if err == nil {
 		t.Error("Expected update fail, but update succeed")
@@ -165,7 +165,7 @@ func TestListNonEmptyService(t *testing.T) {
 	service := NewDummyItemService()
 	var i uint64
 	for i = 0; i < 20; i++ {
-		_, _ = service.Create(*NewItem(0, fmt.Sprintf("title_%v", i)))
+		_, _ = service.Create(*NewItem(0, 10, 10, fmt.Sprintf("title_%v", i)))
 	}
 	lst, err := service.List(0, 3)
 	if err != nil {
@@ -183,7 +183,7 @@ func TestListNearRightBound(t *testing.T) {
 	service := NewDummyItemService()
 	var i uint64
 	for i = 0; i < 20; i++ {
-		_, _ = service.Create(*NewItem(0, fmt.Sprintf("title_%v", i)))
+		_, _ = service.Create(*NewItem(0, 10, 10, fmt.Sprintf("title_%v", i)))
 	}
 	lst, err := service.List(18, 100)
 	if err != nil {
@@ -196,7 +196,7 @@ func TestListRightBound(t *testing.T) {
 	service := NewDummyItemService()
 	var i uint64
 	for i = 0; i < 20; i++ {
-		_, _ = service.Create(*NewItem(0, fmt.Sprintf("title_%v", i)))
+		_, _ = service.Create(*NewItem(0, 10, 10, fmt.Sprintf("title_%v", i)))
 	}
 	lst, err := service.List(20, 100)
 	if err != nil {
@@ -211,7 +211,7 @@ func TestListBeyondRightBound(t *testing.T) {
 	service := NewDummyItemService()
 	var i uint64
 	for i = 0; i < 20; i++ {
-		_, _ = service.Create(*NewItem(0, fmt.Sprintf("title_%v", i)))
+		_, _ = service.Create(*NewItem(0, 10, 10, fmt.Sprintf("title_%v", i)))
 	}
 	lst, err := service.List(21, 100)
 	if err == nil {
@@ -229,7 +229,7 @@ func TestRemoveNonExisting(t *testing.T) {
 
 func TestRemoveTheOnlyItem(t *testing.T) {
 	service := NewDummyItemService()
-	uid, _ := service.Create(*NewItem(0, "title"))
+	uid, _ := service.Create(*NewItem(0, 10, 10, "title"))
 	err := service.Remove(uid)
 	if err != nil {
 		t.Errorf("Expected successful remove, but %v received", err)
@@ -245,7 +245,7 @@ func TestRemoveItemsCount(t *testing.T) {
 	//goland:noinspection SpellCheckingInspection
 	uids := make([]uint64, 0)
 	for i := 0; i < 20; i++ {
-		uid, _ := service.Create(*NewItem(0, fmt.Sprintf("title_%v", i)))
+		uid, _ := service.Create(*NewItem(0, 10, 10, fmt.Sprintf("title_%v", i)))
 		uids = append(uids, uid)
 	}
 	rand.Seed(time.Now().UnixNano())
@@ -264,9 +264,9 @@ func TestRemoveItemsCount(t *testing.T) {
 
 func TestRemoveLastItem(t *testing.T) {
 	service := NewDummyItemService()
-	uid1, _ := service.Create(*NewItem(0, "title_1"))
-	uid2, _ := service.Create(*NewItem(0, "title_2"))
-	uid3, _ := service.Create(*NewItem(0, "title_3"))
+	uid1, _ := service.Create(*NewItem(0, 10, 10, "title_1"))
+	uid2, _ := service.Create(*NewItem(0, 10, 10, "title_2"))
+	uid3, _ := service.Create(*NewItem(0, 10, 10, "title_3"))
 	err := service.Remove(uid3)
 	if err != nil {
 		t.Errorf("Expected successful removal, but %v received", err)
@@ -301,9 +301,9 @@ func TestRemoveLastItem(t *testing.T) {
 
 func TestRemoveMiddleItem(t *testing.T) {
 	service := NewDummyItemService()
-	uid1, _ := service.Create(*NewItem(0, "title_1"))
-	uid2, _ := service.Create(*NewItem(0, "title_2"))
-	uid3, _ := service.Create(*NewItem(0, "title_3"))
+	uid1, _ := service.Create(*NewItem(0, 10, 10, "title_1"))
+	uid2, _ := service.Create(*NewItem(0, 10, 10, "title_2"))
+	uid3, _ := service.Create(*NewItem(0, 10, 10, "title_3"))
 	err := service.Remove(uid2)
 	if err != nil {
 		t.Errorf("Expected successful removal, but %v received", err)
@@ -338,9 +338,9 @@ func TestRemoveMiddleItem(t *testing.T) {
 
 func TestRemoveFirstItem(t *testing.T) {
 	service := NewDummyItemService()
-	uid1, _ := service.Create(*NewItem(0, "title_1"))
-	uid2, _ := service.Create(*NewItem(0, "title_2"))
-	uid3, _ := service.Create(*NewItem(0, "title_3"))
+	uid1, _ := service.Create(*NewItem(0, 10, 10, "title_1"))
+	uid2, _ := service.Create(*NewItem(0, 10, 10, "title_2"))
+	uid3, _ := service.Create(*NewItem(0, 10, 10, "title_3"))
 	err := service.Remove(uid1)
 	if err != nil {
 		t.Errorf("Expected successful removal, but %v received", err)
@@ -378,7 +378,7 @@ func TestRemoveAllItems(t *testing.T) {
 	//goland:noinspection SpellCheckingInspection
 	items := make([]Item, 0)
 	for i := 0; i < 20; i++ {
-		uid, _ := service.Create(*NewItem(0, fmt.Sprintf("title_%v", i)))
+		uid, _ := service.Create(*NewItem(0, 10, 10, fmt.Sprintf("title_%v", i)))
 		item, _ := service.Describe(uid)
 		items = append(items, *item)
 	}

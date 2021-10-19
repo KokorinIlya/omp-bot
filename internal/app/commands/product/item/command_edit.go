@@ -4,31 +4,37 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/ozonmp/omp-bot/internal/service/product/item"
-	"strconv"
 	"strings"
 )
 
-func (commander *ItemCommander) Edit(inputMessage *tgbotapi.Message) { // TODO: get remaining fields
+func (commander *ItemCommander) Edit(inputMessage *tgbotapi.Message) {
 	chatId := inputMessage.Chat.ID
 	commandArgs := strings.Split(inputMessage.CommandArguments(), " ")
-	if len(commandArgs) != 2 {
+	if len(commandArgs) != 4 {
 		msgText := fmt.Sprintf(
-			"Expected 2 arguments: <id> <title>, but received %v: %v",
+			"Expected 4 arguments: <id> <owner_id> <product_id> <title>, but received %v: %v",
 			len(commandArgs), commandArgs,
 		)
 		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
-	itemId, err := strconv.ParseUint(commandArgs[0], 10, 64)
+	itemId, err := commander.parseIdOrSendError(commandArgs[0], chatId, "to edit item by")
 	if err != nil {
-		msgText := fmt.Sprintf("Couldn't parse id to edit item by: %v", err)
-		msg := tgbotapi.NewMessage(chatId, msgText)
-		commander.sendMessage(msg)
 		return
 	}
+	ownerId, err := commander.parseIdOrSendError(commandArgs[1], chatId, "of owner")
+	if err != nil {
+		return
+	}
+	productId, err := commander.parseIdOrSendError(commandArgs[2], chatId, "of product")
+	if err != nil {
+		return
+	}
+
 	newTitle := commandArgs[1]
-	newItem := item.NewItem(itemId, newTitle)
+	newItem := item.NewItem(itemId, ownerId, productId, newTitle)
+
 	err = commander.itemService.Update(itemId, *newItem)
 	if err != nil {
 		msgText := fmt.Sprintf("Cannot edit item by id %v: %v", itemId, err)

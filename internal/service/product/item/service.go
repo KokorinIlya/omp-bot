@@ -9,10 +9,10 @@ import (
 type DummyItemService struct {
 	indexById map[uint64]int
 	items     []Item
-}
+} // We can use linked hash map to get faster removing
 
 const (
-	maxRetries    = 10
+	maxRetries    = 100
 	noSuchItemIdx = -1
 )
 
@@ -94,6 +94,7 @@ func (itemService *DummyItemService) Remove(itemId uint64) error {
 		itemService.items[i-1] = item
 		itemService.indexById[item.Id] = i - 1
 	}
+
 	// Ids of removed items will not be allocated for new items
 	itemService.indexById[itemId] = noSuchItemIdx
 	itemService.items = itemService.items[:len(itemService.items)-1]

@@ -4,18 +4,34 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/ozonmp/omp-bot/internal/service/product/item"
+	"strings"
 )
 
 func (commander *ItemCommander) New(inputMessage *tgbotapi.Message) {
 	chatId := inputMessage.Chat.ID
-	title := inputMessage.CommandArguments()
-	if title == "" {
-		msg := tgbotapi.NewMessage(chatId, "Expected new item title")
+	commandArgs := strings.Split(inputMessage.CommandArguments(), " ")
+	if len(commandArgs) != 3 {
+		msgText := fmt.Sprintf(
+			"Expected 3 arguments: <owner_id> <product_id> <title>, but received %v: %v",
+			len(commandArgs), commandArgs,
+		)
+		msg := tgbotapi.NewMessage(chatId, msgText)
 		commander.sendMessage(msg)
 		return
 	}
+	ownerId, err := commander.parseIdOrSendError(commandArgs[0], chatId, "of owner")
+	if err != nil {
+		return
+	}
+	productId, err := commander.parseIdOrSendError(commandArgs[1], chatId, "of product")
+	if err != nil {
+		return
+	}
+	title := commandArgs[2]
+
+
 	// Ids are allocated by ItemService
-	newItem := item.NewItem(0, title)
+	newItem := item.NewItem(0, ownerId, productId, title)
 	newId, err := commander.itemService.Create(*newItem)
 	if err != nil {
 		msgText := fmt.Sprintf("Couldn't create new item: %v", err)
