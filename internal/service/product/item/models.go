@@ -11,7 +11,7 @@ type Item struct {
 
 func (item Item) String() string {
 	return fmt.Sprintf(
-		"Item { id = %v; owner_id =%v, product_id = %v; title = %v }",
+		"Item { id = %v; owner_id = %v, product_id = %v; title = %v }",
 		item.Id, item.OwnerId, item.ProductId, item.Title,
 	)
 }
