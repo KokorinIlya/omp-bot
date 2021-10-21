@@ -8,29 +8,29 @@ import (
 	"testing"
 )
 
-type MockedItemService struct {
+type MockedService struct {
 	Count uint64
 	Items []item.Item
 	Err   error
 }
 
-func (itemService *MockedItemService) List(_ uint64, _ uint64) ([]item.Item, error) {
-	return itemService.Items, itemService.Err
+func (service *MockedService) List(_ uint64, _ uint64) ([]item.Item, error) {
+	return service.Items, service.Err
 }
 
-func (itemService *MockedItemService) ItemsCount() uint64 {
-	return itemService.Count
+func (service *MockedService) ItemsCount() uint64 {
+	return service.Count
 }
 
 func TestPaginateEmpty(t *testing.T) {
 	t.Parallel()
-	mockedItemService := MockedItemService{
+	mockedService := MockedService{
 		Count: 0,
 		Items: make([]item.Item, 0),
 		Err:   nil,
 	}
 
-	text, keyboard, err := getPaginatedMessage(&mockedItemService, 0, 10)
+	text, keyboard, err := getPaginatedMessage(&mockedService, 0, 10)
 	assert.Nil(t, err)
 	assert.Equal(t, "Ни одного элемента", text)
 	assert.Equal(t, 1, len(keyboard.InlineKeyboard))
@@ -39,19 +39,19 @@ func TestPaginateEmpty(t *testing.T) {
 
 func TestPaginateError(t *testing.T) {
 	t.Parallel()
-	mockedItemService := MockedItemService{
+	mockedService := MockedService{
 		Count: 0,
 		Items: make([]item.Item, 0),
 		Err:   errors.New("bang"),
 	}
 
-	_, _, err := getPaginatedMessage(&mockedItemService, 0, 10)
+	_, _, err := getPaginatedMessage(&mockedService, 0, 10)
 	assert.NotNil(t, err)
 }
 
 func TestPaginateOnlyElement(t *testing.T) {
 	t.Parallel()
-	mockedItemService := MockedItemService{
+	mockedService := MockedService{
 		Count: 1,
 		Items: []item.Item{
 			*item.NewItem(10, 20, 30, "title"),
@@ -59,9 +59,9 @@ func TestPaginateOnlyElement(t *testing.T) {
 		Err: nil,
 	}
 
-	text, keyboard, err := getPaginatedMessage(&mockedItemService, 0, 10)
+	text, keyboard, err := getPaginatedMessage(&mockedService, 0, 10)
 	assert.Nil(t, err)
-	expText := mockedItemService.Items[0].String() + ";\n"
+	expText := mockedService.Items[0].String() + ";\n"
 	assert.Equal(t, expText, text)
 	assert.Equal(t, 1, len(keyboard.InlineKeyboard))
 	assert.Equal(t, 0, len(keyboard.InlineKeyboard[0]))
@@ -69,7 +69,7 @@ func TestPaginateOnlyElement(t *testing.T) {
 
 func TestPaginateOnlyPage(t *testing.T) {
 	t.Parallel()
-	mockedItemService := MockedItemService{
+	mockedService := MockedService{
 		Count: 1,
 		Items: []item.Item{
 			*item.NewItem(10, 20, 30, "title_1"),
@@ -79,12 +79,12 @@ func TestPaginateOnlyPage(t *testing.T) {
 		Err: nil,
 	}
 
-	text, keyboard, err := getPaginatedMessage(&mockedItemService, 0, 10)
+	text, keyboard, err := getPaginatedMessage(&mockedService, 0, 10)
 	assert.Nil(t, err)
 	expText := fmt.Sprintf("%v;\n%v;\n%v;\n",
-		mockedItemService.Items[0].String(),
-		mockedItemService.Items[1].String(),
-		mockedItemService.Items[2].String(),
+		mockedService.Items[0].String(),
+		mockedService.Items[1].String(),
+		mockedService.Items[2].String(),
 	)
 	assert.Equal(t, expText, text)
 	assert.Equal(t, 1, len(keyboard.InlineKeyboard))
@@ -93,7 +93,7 @@ func TestPaginateOnlyPage(t *testing.T) {
 
 func TestPaginateLeftmostPage(t *testing.T) {
 	t.Parallel()
-	mockedItemService := MockedItemService{
+	mockedService := MockedService{
 		Count: 10,
 		Items: []item.Item{
 			*item.NewItem(10, 20, 30, "title_1"),
@@ -103,12 +103,12 @@ func TestPaginateLeftmostPage(t *testing.T) {
 		Err: nil,
 	}
 
-	text, keyboard, err := getPaginatedMessage(&mockedItemService, 0, 3)
+	text, keyboard, err := getPaginatedMessage(&mockedService, 0, 3)
 	assert.Nil(t, err)
 	expText := fmt.Sprintf("%v;\n%v;\n%v;\n",
-		mockedItemService.Items[0].String(),
-		mockedItemService.Items[1].String(),
-		mockedItemService.Items[2].String(),
+		mockedService.Items[0].String(),
+		mockedService.Items[1].String(),
+		mockedService.Items[2].String(),
 	)
 	assert.Equal(t, expText, text)
 	assert.Equal(t, 1, len(keyboard.InlineKeyboard))
@@ -119,7 +119,7 @@ func TestPaginateLeftmostPage(t *testing.T) {
 
 func TestPaginateRightmostPage(t *testing.T) {
 	t.Parallel()
-	mockedItemService := MockedItemService{
+	mockedService := MockedService{
 		Count: 100,
 		Items: []item.Item{
 			*item.NewItem(10, 20, 30, "title_1"),
@@ -129,12 +129,12 @@ func TestPaginateRightmostPage(t *testing.T) {
 		Err: nil,
 	}
 
-	text, keyboard, err := getPaginatedMessage(&mockedItemService, 97, 10)
+	text, keyboard, err := getPaginatedMessage(&mockedService, 97, 10)
 	assert.Nil(t, err)
 	expText := fmt.Sprintf("%v;\n%v;\n%v;\n",
-		mockedItemService.Items[0].String(),
-		mockedItemService.Items[1].String(),
-		mockedItemService.Items[2].String(),
+		mockedService.Items[0].String(),
+		mockedService.Items[1].String(),
+		mockedService.Items[2].String(),
 	)
 	assert.Equal(t, expText, text)
 	assert.Equal(t, 1, len(keyboard.InlineKeyboard))
@@ -145,7 +145,7 @@ func TestPaginateRightmostPage(t *testing.T) {
 
 func TestPaginateMiddlePage(t *testing.T) {
 	t.Parallel()
-	mockedItemService := MockedItemService{
+	mockedService := MockedService{
 		Count: 100,
 		Items: []item.Item{
 			*item.NewItem(10, 20, 30, "title_1"),
@@ -155,12 +155,12 @@ func TestPaginateMiddlePage(t *testing.T) {
 		Err: nil,
 	}
 
-	text, keyboard, err := getPaginatedMessage(&mockedItemService, 50, 3)
+	text, keyboard, err := getPaginatedMessage(&mockedService, 50, 3)
 	assert.Nil(t, err)
 	expText := fmt.Sprintf("%v;\n%v;\n%v;\n",
-		mockedItemService.Items[0].String(),
-		mockedItemService.Items[1].String(),
-		mockedItemService.Items[2].String(),
+		mockedService.Items[0].String(),
+		mockedService.Items[1].String(),
+		mockedService.Items[2].String(),
 	)
 	assert.Equal(t, expText, text)
 	assert.Equal(t, 1, len(keyboard.InlineKeyboard))

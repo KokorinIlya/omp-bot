@@ -19,9 +19,9 @@ type ListService interface {
 	ItemsCount() uint64
 }
 
-func getPaginatedMessage(itemService ListService,
+func getPaginatedMessage(listService ListService,
 	cursor uint64, limit uint64) (string, *tgbotapi.InlineKeyboardMarkup, error) {
-	items, err := itemService.List(cursor, limit)
+	items, err := listService.List(cursor, limit)
 	if err != nil {
 		return "", nil, err
 	}
@@ -39,7 +39,7 @@ func getPaginatedMessage(itemService ListService,
 		}
 		buttons = append(buttons, *button)
 	}
-	if cursor+limit < itemService.ItemsCount() {
+	if cursor+limit < listService.ItemsCount() {
 		newCursor := cursor + limit
 		button, err := makeButton("К следующей странице", newCursor)
 		if err != nil {

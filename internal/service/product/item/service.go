@@ -23,18 +23,18 @@ func NewDummyService() *DummyService {
 	}
 }
 
-func (itemService *DummyService) Describe(itemId uint64) (*Item, error) {
-	idx, contains := itemService.indexById[itemId]
+func (service *DummyService) Describe(itemId uint64) (*Item, error) {
+	idx, contains := service.indexById[itemId]
 	if !contains || idx < 0 {
 		return nil, errors.New(fmt.Sprintf(
 			"No item with id %v", itemId,
 		))
 	}
-	return &itemService.items[idx], nil
+	return &service.items[idx], nil
 }
 
-func (itemService *DummyService) List(cursor uint64, limit uint64) ([]Item, error) {
-	totalCount := uint64(len(itemService.items))
+func (service *DummyService) List(cursor uint64, limit uint64) ([]Item, error) {
+	totalCount := uint64(len(service.items))
 	if cursor > totalCount {
 		return nil, errors.New(fmt.Sprintf(
 			"Incorrect cursor position %v, correct cursor positions are [0..%v]",
@@ -45,15 +45,15 @@ func (itemService *DummyService) List(cursor uint64, limit uint64) ([]Item, erro
 	if right > totalCount {
 		right = totalCount
 	}
-	return itemService.items[cursor:right], nil
+	return service.items[cursor:right], nil
 }
 
-func (itemService *DummyService) Create(item Item) (uint64, error) {
+func (service *DummyService) Create(item Item) (uint64, error) {
 	var newId uint64
 	retries := 0
 	for {
 		newId = uint64(rand.Uint32())<<32 + uint64(rand.Uint32())
-		_, contains := itemService.indexById[newId]
+		_, contains := service.indexById[newId]
 		if !contains {
 			break
 		}
@@ -63,44 +63,44 @@ func (itemService *DummyService) Create(item Item) (uint64, error) {
 		retries++
 	}
 	item.Id = newId
-	itemService.items = append(itemService.items, item)
-	itemService.indexById[newId] = len(itemService.items) - 1
+	service.items = append(service.items, item)
+	service.indexById[newId] = len(service.items) - 1
 	return newId, nil
 }
 
-func (itemService *DummyService) Update(itemId uint64, item Item) error {
+func (service *DummyService) Update(itemId uint64, item Item) error {
 	if itemId != item.Id {
 		return errors.New("itemId != item.Id")
 	}
-	idx, contains := itemService.indexById[itemId]
+	idx, contains := service.indexById[itemId]
 	if !contains || idx < 0 {
 		return errors.New(fmt.Sprintf(
 			"No item with id %v", itemId,
 		))
 	}
-	itemService.items[idx] = item
+	service.items[idx] = item
 	return nil
 }
 
-func (itemService *DummyService) Remove(itemId uint64) error {
-	idx, contains := itemService.indexById[itemId]
+func (service *DummyService) Remove(itemId uint64) error {
+	idx, contains := service.indexById[itemId]
 	if !contains || idx < 0 {
 		return errors.New(fmt.Sprintf(
 			"No item with id %v", itemId,
 		))
 	}
-	for i := idx + 1; i < len(itemService.items); i++ {
-		item := itemService.items[i]
-		itemService.items[i-1] = item
-		itemService.indexById[item.Id] = i - 1
+	for i := idx + 1; i < len(service.items); i++ {
+		item := service.items[i]
+		service.items[i-1] = item
+		service.indexById[item.Id] = i - 1
 	}
 
 	// Ids of removed items will not be allocated for new items
-	itemService.indexById[itemId] = noSuchItemIdx
-	itemService.items = itemService.items[:len(itemService.items)-1]
+	service.indexById[itemId] = noSuchItemIdx
+	service.items = service.items[:len(service.items)-1]
 	return nil
 }
 
-func (itemService *DummyService) ItemsCount() uint64 {
-	return uint64(len(itemService.items))
+func (service *DummyService) ItemsCount() uint64 {
+	return uint64(len(service.items))
 }
