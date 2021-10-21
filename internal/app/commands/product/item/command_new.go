@@ -25,7 +25,7 @@ func (commander *ItemCommander) New(inputMessage *tgbotapi.Message) {
 	title := commandArgs[2]
 
 
-	// Ids are allocated by ItemService
+	// Ids are allocated by Service
 	newItem := item.NewItem(0, ownerId, productId, title)
 	newId, err := commander.itemService.Create(*newItem)
 	if err != nil {

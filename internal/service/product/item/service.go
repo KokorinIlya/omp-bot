@@ -6,7 +6,7 @@ import (
 	"math/rand"
 )
 
-type DummyItemService struct {
+type DummyService struct {
 	indexById map[uint64]int
 	items     []Item
 } // We can use linked hash map to get faster removing
@@ -16,14 +16,14 @@ const (
 	noSuchItemIdx = -1
 )
 
-func NewDummyItemService() *DummyItemService {
-	return &DummyItemService{
+func NewDummyService() *DummyService {
+	return &DummyService{
 		items:     make([]Item, 0),
 		indexById: make(map[uint64]int),
 	}
 }
 
-func (itemService *DummyItemService) Describe(itemId uint64) (*Item, error) {
+func (itemService *DummyService) Describe(itemId uint64) (*Item, error) {
 	idx, contains := itemService.indexById[itemId]
 	if !contains || idx < 0 {
 		return nil, errors.New(fmt.Sprintf(
@@ -33,7 +33,7 @@ func (itemService *DummyItemService) Describe(itemId uint64) (*Item, error) {
 	return &itemService.items[idx], nil
 }
 
-func (itemService *DummyItemService) List(cursor uint64, limit uint64) ([]Item, error) {
+func (itemService *DummyService) List(cursor uint64, limit uint64) ([]Item, error) {
 	totalCount := uint64(len(itemService.items))
 	if cursor > totalCount {
 		return nil, errors.New(fmt.Sprintf(
@@ -48,7 +48,7 @@ func (itemService *DummyItemService) List(cursor uint64, limit uint64) ([]Item, 
 	return itemService.items[cursor:right], nil
 }
 
-func (itemService *DummyItemService) Create(item Item) (uint64, error) {
+func (itemService *DummyService) Create(item Item) (uint64, error) {
 	var newId uint64
 	retries := 0
 	for {
@@ -68,7 +68,7 @@ func (itemService *DummyItemService) Create(item Item) (uint64, error) {
 	return newId, nil
 }
 
-func (itemService *DummyItemService) Update(itemId uint64, item Item) error {
+func (itemService *DummyService) Update(itemId uint64, item Item) error {
 	if itemId != item.Id {
 		return errors.New("itemId != item.Id")
 	}
@@ -82,7 +82,7 @@ func (itemService *DummyItemService) Update(itemId uint64, item Item) error {
 	return nil
 }
 
-func (itemService *DummyItemService) Remove(itemId uint64) error {
+func (itemService *DummyService) Remove(itemId uint64) error {
 	idx, contains := itemService.indexById[itemId]
 	if !contains || idx < 0 {
 		return errors.New(fmt.Sprintf(
@@ -101,6 +101,6 @@ func (itemService *DummyItemService) Remove(itemId uint64) error {
 	return nil
 }
 
-func (itemService *DummyItemService) ItemsCount() uint64 {
+func (itemService *DummyService) ItemsCount() uint64 {
 	return uint64(len(itemService.items))
 }

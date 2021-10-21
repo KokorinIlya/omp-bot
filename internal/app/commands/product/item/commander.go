@@ -8,8 +8,7 @@ import (
 	"github.com/ozonmp/omp-bot/internal/service/product/item"
 )
 
-//goland:noinspection GoNameStartsWithPackageName
-type ItemService interface {
+type Service interface {
 	Describe(itemId uint64) (*item.Item, error)
 	List(cursor uint64, limit uint64) ([]item.Item, error)
 	Create(item item.Item) (uint64, error)
@@ -18,14 +17,13 @@ type ItemService interface {
 	ItemsCount() uint64
 }
 
-//goland:noinspection GoNameStartsWithPackageName
 type ItemCommander struct {
 	botApi      *tgbotapi.BotAPI
-	itemService ItemService
+	itemService Service
 }
 
 func NewItemCommander(botApi *tgbotapi.BotAPI) *ItemCommander {
-	service := item.NewDummyItemService()
+	service := item.NewDummyService()
 	return &ItemCommander{
 		botApi:      botApi,
 		itemService: service,
